@@ -38,6 +38,7 @@ private:
 	/////////////////
 	// LECTURE 2
 
-	GLuint m_VBOTest = 0; // 아이디를 만들어서 
+	GLuint m_VBOTestPos = 0; // 아이디를 만들어서 
+	GLuint m_VBOTestCol = 0; // 아이디를 만들어서 
 };
 

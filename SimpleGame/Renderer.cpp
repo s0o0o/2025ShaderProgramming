@@ -51,7 +51,7 @@ void Renderer::CreateVertexBufferObjects()
 	///////////		LECTURE 2
 	/////////////////////////////////////
 
-	float test[]
+	float testPos[]
 		=
 	{
 		0.f, 0.f, 0.f, 
@@ -60,11 +60,26 @@ void Renderer::CreateVertexBufferObjects()
 	};
 
 				
-	glGenBuffers(1, &m_VBOTest);	// (갯수, 레퍼런스에 넘겨줌)	
+	glGenBuffers(1, &m_VBOTestPos);	// (갯수, 레퍼런스에 넘겨줌)	
 	// 이렇게만 하면 gpu에 VBO에 대한 메모리가 전혀 저장이 되지 않음.. 데이터를 올려줘야함
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTest);	// testID라는 애를 쓰겠다는.. 활성화하겠다는 의미(내가 이해한건..)
-	glBufferData(GL_ARRAY_BUFFER, sizeof(test), test, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);	// testID라는 애를 쓰겠다는.. 활성화하겠다는 의미(내가 이해한건..)
+	glBufferData(GL_ARRAY_BUFFER, sizeof(testPos), testPos, GL_STATIC_DRAW);
 
+	///////////		LECTURE 3
+
+	float testColor[]
+		=
+	{
+		1.f, 0.f, 0.f, 1.f,
+		0.f, 1.f, 0.f, 1.f,
+		0.f, 0.f, 1.f, 1.f//Triangle1	// 반시계방향으로 버텍스 담아둬야함
+	};
+
+
+	glGenBuffers(1, &m_VBOTestCol);	// (갯수, 레퍼런스에 넘겨줌)	
+	// 이렇게만 하면 gpu에 VBO에 대한 메모리가 전혀 저장이 되지 않음.. 데이터를 올려줘야함
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestCol);	// testID라는 애를 쓰겠다는.. 활성화하겠다는 의미(내가 이해한건..)
+	glBufferData(GL_ARRAY_BUFFER, sizeof(testColor), testColor, GL_STATIC_DRAW);
 
 }
 
@@ -215,14 +230,24 @@ void Renderer::DrawTest()
 	glUseProgram(m_SolidRectShader);
 	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Trans"), 0, 0, 0, 1);
 	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), 1, 1, 1, 1);
-	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
-	glEnableVertexAttribArray(attribPosition);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTest);
+	int aPosLoc = glGetAttribLocation(m_SolidRectShader, "a_Position"); // a_Position라는 함수를 받아와서
+	int aColLoc = glGetAttribLocation(m_SolidRectShader, "a_Color"); // lecture3 컬러 넣기
+
+	glEnableVertexAttribArray(aPosLoc);	// enable 시켜줘야함, attribute는 사용자가 입력한 값
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);	// 받아온걸 bind하고
 	glVertexAttribPointer(
-		attribPosition, 3, GL_FLOAT,
+		aPosLoc, 3, GL_FLOAT,
 		GL_FALSE, sizeof(float) * 3, 0);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDisableVertexAttribArray(attribPosition);
+
+	glEnableVertexAttribArray(aColLoc);	// enable 시켜줘야함, attribute는 사용자가 입력한 값
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestCol);	// 받아온걸 bind하고
+	glVertexAttribPointer(
+		aColLoc, 4, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 4, 0);	// m_VBOTestCol 얘한테 한방에 몇개 읽어올래? -> 4개니까 수정(스트라이드도 수정)
+	glDrawArrays(GL_TRIANGLES, 0, 3);		// 스트라이드는 몇개씩 건너뛸래 이런거
+
+	glDisableVertexAttribArray(aPosLoc);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
