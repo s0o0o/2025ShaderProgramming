@@ -19,7 +19,10 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
-	
+
+	// LECTURE4 (0916)
+	m_TestShader = CompileShaders("./Shaders/Test.vs", "./Shaders/Test.fs");
+
 	//Create VBOs
 	CreateVertexBufferObjects();
 
@@ -51,15 +54,21 @@ void Renderer::CreateVertexBufferObjects()
 	///////////		LECTURE 2
 	/////////////////////////////////////
 
+	float temp = 0.5f;
+	float size = 0.5f;
 	float testPos[]
 		=
 	{
-		0.f, 0.f, 0.f, 
-		1.f, 0.f, 0.f,
-		 1.f, 1.f, 0.f, //Triangle1	// 반시계방향으로 버텍스 담아둬야함
+		(0.f - temp) * size, (0.f - temp) * size, 0.f,
+		(1.f - temp) * size, (0.f - temp) * size, 0.f,
+		(1.f - temp) * size, (1.f - temp) * size, 0.f, //Triangle1	// 반시계방향으로 버텍스 담아둬야함
+
+		(0.f - temp) * size, (0.f - temp) * size, 0.f,
+		(1.f - temp) * size, (1.f - temp) * size, 0.f,
+		(0.f - temp) * size, (1.f - temp) * size, 0.f, //Triangle1
 	};
 
-				
+
 	glGenBuffers(1, &m_VBOTestPos);	// (갯수, 레퍼런스에 넘겨줌)	
 	// 이렇게만 하면 gpu에 VBO에 대한 메모리가 전혀 저장이 되지 않음.. 데이터를 올려줘야함
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);	// testID라는 애를 쓰겠다는.. 활성화하겠다는 의미(내가 이해한건..)
@@ -67,12 +76,16 @@ void Renderer::CreateVertexBufferObjects()
 
 	///////////		LECTURE 3
 
+
 	float testColor[]
 		=
 	{
 		1.f, 0.f, 0.f, 1.f,
 		0.f, 1.f, 0.f, 1.f,
-		0.f, 0.f, 1.f, 1.f//Triangle1	// 반시계방향으로 버텍스 담아둬야함
+		0.f, 0.f, 1.f, 1.f,		// Triangle1	// 반시계방향으로 버텍스 담아둬야함
+		1.f, 0.f, 0.f, 1.f,
+		0.f, 1.f, 0.f, 1.f,
+		0.f, 0.f, 1.f, 1.f		// Triangle2
 	};
 
 
@@ -125,7 +138,7 @@ void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum S
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
-bool Renderer::ReadFile(char* filename, std::string *target)
+bool Renderer::ReadFile(char* filename, std::string* target)
 {
 	std::ifstream file(filename);
 	if (file.fail())
@@ -227,32 +240,30 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 void Renderer::DrawTest()
 {
 	//Program select
-	glUseProgram(m_SolidRectShader);
-	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Trans"), 0, 0, 0, 1);
-	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), 1, 1, 1, 1);
-	int aPosLoc = glGetAttribLocation(m_SolidRectShader, "a_Position"); // a_Position라는 함수를 받아와서
-	int aColLoc = glGetAttribLocation(m_SolidRectShader, "a_Color"); // lecture3 컬러 넣기
+	glUseProgram(m_TestShader);
+
+	int aPosLoc = glGetAttribLocation(m_TestShader, "a_Position"); // a_Position라는 함수를 받아와서
+	int aColLoc = glGetAttribLocation(m_TestShader, "a_Color"); // lecture3 컬러 넣기
 
 	glEnableVertexAttribArray(aPosLoc);	// enable 시켜줘야함, attribute는 사용자가 입력한 값
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestPos);	// 받아온걸 bind하고
 	glVertexAttribPointer(
 		aPosLoc, 3, GL_FLOAT,
 		GL_FALSE, sizeof(float) * 3, 0);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
 
 	glEnableVertexAttribArray(aColLoc);	// enable 시켜줘야함, attribute는 사용자가 입력한 값
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestCol);	// 받아온걸 bind하고
 	glVertexAttribPointer(
 		aColLoc, 4, GL_FLOAT,
 		GL_FALSE, sizeof(float) * 4, 0);	// m_VBOTestCol 얘한테 한방에 몇개 읽어올래? -> 4개니까 수정(스트라이드도 수정)
-	glDrawArrays(GL_TRIANGLES, 0, 3);		// 스트라이드는 몇개씩 건너뛸래 이런거
+	glDrawArrays(GL_TRIANGLES, 0, 6);		// 스트라이드는 몇개씩 건너뛸래 이런거
 
 	glDisableVertexAttribArray(aPosLoc);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 
-void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
+void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 {
 	*newX = x * 2.f / m_WindowSizeX;
 	*newY = y * 2.f / m_WindowSizeY;
