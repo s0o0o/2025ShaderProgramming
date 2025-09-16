@@ -44,5 +44,8 @@ private:
 
 	// LECTURE 4 (0916)
 	GLuint m_TestShader = 0; // 아이디를 만들어서 
+
+	// TIME 관련
+	float m_time = 0;
 };
 

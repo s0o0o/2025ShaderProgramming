@@ -55,7 +55,7 @@ void Renderer::CreateVertexBufferObjects()
 	/////////////////////////////////////
 
 	float temp = 0.5f;
-	float size = 0.5f;
+	float size = 0.25f;
 	float testPos[]
 		=
 	{
@@ -241,6 +241,10 @@ void Renderer::DrawTest()
 {
 	//Program select
 	glUseProgram(m_TestShader);
+
+	m_time += 0.005;
+	int uTimeLoc = glGetUniformLocation(m_TestShader, "u_Time");
+	glUniform1f(uTimeLoc, m_time);
 
 	int aPosLoc = glGetAttribLocation(m_TestShader, "a_Position"); // a_Position라는 함수를 받아와서
 	int aColLoc = glGetAttribLocation(m_TestShader, "a_Color"); // lecture3 컬러 넣기
