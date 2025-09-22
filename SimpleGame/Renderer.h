@@ -19,6 +19,9 @@ public:
 	// LECTURE 2
 	void DrawTest();
 
+	// 0922
+	void DrawParticle();
+
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
 	bool ReadFile(char* filename, std::string *target);
@@ -26,6 +29,7 @@ private:
 	GLuint CompileShaders(char* filenameVS, char* filenameFS);
 	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
+	void GenerateParticles(int numParticles);
 
 	bool m_Initialized = false;
 	
@@ -47,5 +51,10 @@ private:
 
 	// TIME ฐüทร
 	float m_time = 0;
+
+	// PARTICLE
+	GLuint m_ParticleShader = 0;
+	GLuint m_VBOParticle = 0;
+	GLuint m_VBOParticleVertexCount = 0;
 };
 

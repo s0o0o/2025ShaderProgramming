@@ -1,6 +1,6 @@
 #version 330
 
-in vec3 a_Position; 
+in vec3 a_Position;
 in float a_Radius;
 in vec4 a_Color;
 
@@ -13,11 +13,11 @@ void main()
 {
 	float value = fract(u_Time) * 2 - 1; // -1~1
 	float rad = (value + 1)*c_PI;
-	float y = a_Radius * sin(rad);
-	float x = a_Radius * -cos(rad);
+	float y = a_Radius*sin(rad);
+	float x = a_Radius*-cos(rad);
 
 	vec4 newPosition = vec4(a_Position, 1);
-	newPosition.xy = newPosition.xy + vec2(x,y);	
+	newPosition.xy = newPosition.xy + fract(u_Time/2)*vec2(x,y);	// 이러면 나선형
 	gl_Position = newPosition;
 
 	v_Color = a_Color;
