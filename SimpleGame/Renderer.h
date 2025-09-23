@@ -14,6 +14,7 @@ public:
 	~Renderer();
 
 	bool IsInitialized();
+	void ReloadAllShaderPrograms(); // 0923
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 
 	// LECTURE 2
@@ -30,6 +31,8 @@ private:
 	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
 	void GenerateParticles(int numParticles);
+	void CompileAllShaderPrograms();
+	void DeleteAllShaderPrograms();
 
 	bool m_Initialized = false;
 	

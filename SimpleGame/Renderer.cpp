@@ -16,8 +16,24 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Set window size
 	m_WindowSizeX = windowSizeX;
 	m_WindowSizeY = windowSizeY;
+	
+	// 0923 Compile All Shaders
+	CompileAllShaderPrograms();
 
-	//Load shaders
+	//Create VBOs
+	CreateVertexBufferObjects();
+
+	GenerateParticles(10000);
+
+	if (m_SolidRectShader > 0 && m_VBORect > 0)
+	{
+		m_Initialized = true;
+	}
+}
+
+
+void Renderer::CompileAllShaderPrograms()
+{	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 
 	// LECTURE4 (0916)
@@ -25,22 +41,25 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	// LECTURE4 (0916)
 	m_ParticleShader = CompileShaders("./Shaders/Particles.vs", "./Shaders/Particles.fs");
-
-	//Create VBOs
-	CreateVertexBufferObjects();
-
-	if (m_SolidRectShader > 0 && m_VBORect > 0)
-	{
-		m_Initialized = true;
-	}
-
-
-	GenerateParticles(1000);
 }
+
+void Renderer::DeleteAllShaderPrograms()
+{
+	glDeleteShader(m_SolidRectShader);
+	glDeleteShader(m_TestShader);
+	glDeleteShader(m_ParticleShader);
+}
+
 
 bool Renderer::IsInitialized()
 {
 	return m_Initialized;
+}
+
+void Renderer::ReloadAllShaderPrograms()
+{
+	DeleteAllShaderPrograms();
+	CompileAllShaderPrograms();
 }
 
 void Renderer::CreateVertexBufferObjects()
@@ -309,28 +328,44 @@ void Renderer::DrawParticle()
 	int aPosLoc = glGetAttribLocation(shader, "a_Position"); // a_Position라는 함수를 받아와서
 	int aRadiusLoc = glGetAttribLocation(shader, "a_Radius"); // 0922
 	int aColLoc = glGetAttribLocation(shader, "a_Color"); // lecture3 컬러 넣기
+	int aSTimeLoc = glGetAttribLocation(shader, "a_STime"); // 0923
+	int aVelLoc = glGetAttribLocation(shader, "a_Vel"); // 0923
 
 	glEnableVertexAttribArray(aPosLoc);	// enable 시켜줘야함, attribute는 사용자가 입력한 값
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);	// 받아온걸 bind하고
 	glVertexAttribPointer(
 		aPosLoc, 3, GL_FLOAT,		// x,y,z 좌표값 3개씩 읽어와라
-		GL_FALSE, sizeof(float) * 8, 0);	// 지금 한 버텍스에 8개의 값 저장되어있.. 그러니까 8개씩 건너뛰도록!
+		GL_FALSE, sizeof(float) * 12, 0);	// 스트라이드는 몇개씩 건너뛸래 이런거
 
 	glEnableVertexAttribArray(aRadiusLoc);	// enable 시켜줘야함, attribute는 사용자가 입력한 값
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);	// 받아온걸 bind하고
 	glVertexAttribPointer(
 		aRadiusLoc, 1, GL_FLOAT,
-		GL_FALSE, sizeof(float) * 8,
+		GL_FALSE, sizeof(float) * 12,
 		(GLvoid*)(sizeof(float) * 3));	// 얘는 첫 값 읽어올때의.. 걔 처음 위치? 그래서 radius값은 4번째부터 시작하니까 0 이 아니라..
 
-	glEnableVertexAttribArray(aColLoc);	
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);	
+	glEnableVertexAttribArray(aColLoc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);
 	glVertexAttribPointer(
 		aColLoc, 4, GL_FLOAT,
-		GL_FALSE, sizeof(float) * 8, 
-		(GLvoid*)(sizeof(float) * 4));
+		GL_FALSE, sizeof(float) * 12,
+		(GLvoid*)(sizeof(float) * 4));	// m_VBOTestCol 얘한테 한방에 몇개 읽어올래? -> 4개니까 수정(스트라이드도 수정)
 
-	glDrawArrays(GL_TRIANGLES, 0, m_VBOParticleVertexCount);		// 스트라이드는 몇개씩 건너뛸래 이런거
+	glEnableVertexAttribArray(aSTimeLoc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);
+	glVertexAttribPointer(
+		aSTimeLoc, 1, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 12,
+		(GLvoid*)(sizeof(float) * 8));
+
+	glEnableVertexAttribArray(aVelLoc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);
+	glVertexAttribPointer(
+		aVelLoc, 3, GL_FLOAT,
+		GL_FALSE, sizeof(float) * 12,
+		(GLvoid*)(sizeof(float) * 9));
+
+	glDrawArrays(GL_TRIANGLES, 0, m_VBOParticleVertexCount - 6*5000);		// 스트라이드는 몇개씩 건너뛸래 이런거
 
 	glDisableVertexAttribArray(aPosLoc);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -345,7 +380,7 @@ void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 
 void Renderer::GenerateParticles(int numParticles)
 {
-	int floatCountPerVertex = 3 + 1 + 4; // x,y,z, value, r,g,b,a
+	int floatCountPerVertex = 3 + 1 + 4 + 1 + 3; // x,y,z, value, r,g,b,a, sTime(생성되는시간), vx,vy,vz
 	int verticesCountPerParticle = 6;
 	int floatCountPerParticle =
 		floatCountPerVertex * verticesCountPerParticle;
@@ -356,8 +391,8 @@ void Renderer::GenerateParticles(int numParticles)
 
 	for (int i = 0; i < numParticles; ++i) {
 		float x, y, z, value, r, g, b, a;
-		x = ((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
-		y = ((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
+		x = 0; //((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
+		y = 0; //((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
 		z = 0.f;
 
 		value = ((float)rand() / (float)RAND_MAX);
@@ -369,6 +404,11 @@ void Renderer::GenerateParticles(int numParticles)
 		
 		float size;
 		size = ((float)rand() / (float)RAND_MAX) * 0.01f;
+		float sTime = ((float)rand() / (float)RAND_MAX) * 2.0; // 0~2 사이 값 
+		float vx, vy, vz;
+		vx = ((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
+		vy = ((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
+		vz = ((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
 
 		int index = i * floatCountPerVertex * verticesCountPerParticle;
 		vertices[index] = x - size; index++;	// v1
@@ -378,7 +418,12 @@ void Renderer::GenerateParticles(int numParticles)
 		vertices[index] = r; index++;
 		vertices[index] = g; index++;
 		vertices[index] = b; index++;
-		vertices[index] = a; index++;		
+		vertices[index] = a; index++;
+		vertices[index] = sTime; index++;
+		vertices[index] = vx; index++;
+		vertices[index] = vy; index++;
+		vertices[index] = vz; index++;
+
 
 		vertices[index] = x + size; index++;	// v2
 		vertices[index] = y + size; index++;
@@ -388,6 +433,10 @@ void Renderer::GenerateParticles(int numParticles)
 		vertices[index] = g; index++;
 		vertices[index] = b; index++;
 		vertices[index] = a; index++;
+		vertices[index] = sTime; index++;
+		vertices[index] = vx; index++;
+		vertices[index] = vy; index++;
+		vertices[index] = vz; index++;
 
 		vertices[index] = x - size; index++;	// v3
 		vertices[index] = y + size; index++;
@@ -397,6 +446,10 @@ void Renderer::GenerateParticles(int numParticles)
 		vertices[index] = g; index++;
 		vertices[index] = b; index++;
 		vertices[index] = a; index++;
+		vertices[index] = sTime; index++;
+		vertices[index] = vx; index++;
+		vertices[index] = vy; index++;
+		vertices[index] = vz; index++;
 
 		vertices[index] = x - size; index++;	// v4
 		vertices[index] = y - size; index++;
@@ -406,6 +459,10 @@ void Renderer::GenerateParticles(int numParticles)
 		vertices[index] = g; index++;
 		vertices[index] = b; index++;
 		vertices[index] = a; index++;
+		vertices[index] = sTime; index++;
+		vertices[index] = vx; index++;
+		vertices[index] = vy; index++;
+		vertices[index] = vz; index++;
 
 		vertices[index] = x + size; index++;	// v5
 		vertices[index] = y - size; index++;
@@ -415,6 +472,10 @@ void Renderer::GenerateParticles(int numParticles)
 		vertices[index] = g; index++;
 		vertices[index] = b; index++;
 		vertices[index] = a; index++;
+		vertices[index] = sTime; index++;
+		vertices[index] = vx; index++;
+		vertices[index] = vy; index++;
+		vertices[index] = vz; index++;
 
 		vertices[index] = x + size; index++;	// v3
 		vertices[index] = y + size; index++;
@@ -424,6 +485,10 @@ void Renderer::GenerateParticles(int numParticles)
 		vertices[index] = g; index++;
 		vertices[index] = b; index++;
 		vertices[index] = a; index++;
+		vertices[index] = sTime; index++;
+		vertices[index] = vx; index++;
+		vertices[index] = vy; index++;
+		vertices[index] = vz; index++;
 	}
 
 	glGenBuffers(1, &m_VBOParticle);	// (갯수, 레퍼런스에 넘겨줌)	
@@ -436,3 +501,4 @@ void Renderer::GenerateParticles(int numParticles)
 
 	m_VBOParticleVertexCount = totalVerticesCount;
 }
+
