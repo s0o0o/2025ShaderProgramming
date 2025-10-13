@@ -19,9 +19,10 @@ public:
 
 	// LECTURE 2
 	void DrawTest();
-
 	// 0922
 	void DrawParticle();
+	// 1013
+	void DrawGridMesh();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
@@ -33,6 +34,7 @@ private:
 	void GenerateParticles(int numParticles);
 	void CompileAllShaderPrograms();
 	void DeleteAllShaderPrograms();
+	void CreateGridMesh(int x, int y);	//1013
 
 	bool m_Initialized = false;
 	
@@ -59,5 +61,10 @@ private:
 	GLuint m_ParticleShader = 0;
 	GLuint m_VBOParticle = 0;
 	GLuint m_VBOParticleVertexCount = 0;
+
+	// M_Grid
+	GLuint m_GridMeshVertexCount = 0;
+	GLuint m_GridMeshVBO = 0;
+	GLuint m_GridMeshShader = 0;
 };
 

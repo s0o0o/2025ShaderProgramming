@@ -100,11 +100,12 @@ void circleParticle()
 	{
 		float t = fract(newTime / lifeTime)*lifeTime;
 		float tt = t*t;
+
 		float x = cos(2*c_PI*a_Value);
 		float y = sin(2*c_PI*a_Value);
 		
 		float newX = x + 0.5*c_G.x*tt;
-		float newY = x + 0.5*c_G.y*tt;
+		float newY = y + 0.5*c_G.y*tt;
 
 		newPosition.xy += vec2(newX,newY);
 
