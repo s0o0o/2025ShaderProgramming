@@ -13,5 +13,4 @@ void main()
 		FragColor = v_Color;
 	else 
 		discard;
-
 }

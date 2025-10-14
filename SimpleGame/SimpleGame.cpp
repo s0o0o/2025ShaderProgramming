@@ -26,7 +26,8 @@ void RenderScene(void)
 		g_bNeedReloadShaderPrograms = false;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	g_Renderer->DrawFullScreenColor(0,0,0,0);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	// 배경 설정
 
 	// Renderer Test
@@ -35,7 +36,6 @@ void RenderScene(void)
 	//g_Renderer->DrawParticle();
 	
 	g_Renderer->DrawGridMesh();
-
 
 	glutSwapBuffers();
 }
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(500, 500);
+	glutInitWindowSize(1000, 1000);
 	glutCreateWindow("Game Software Engineering KPU");
 
 	glewInit();

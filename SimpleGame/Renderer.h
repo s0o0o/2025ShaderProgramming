@@ -16,6 +16,7 @@ public:
 	bool IsInitialized();
 	void ReloadAllShaderPrograms(); // 0923
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
+	void DrawFullScreenColor(float r, float g, float b, float a);	//1013
 
 	// LECTURE 2
 	void DrawTest();
@@ -66,5 +67,10 @@ private:
 	GLuint m_GridMeshVertexCount = 0;
 	GLuint m_GridMeshVBO = 0;
 	GLuint m_GridMeshShader = 0;
+
+	// Full Screen
+	GLuint m_VBOFullScreen = 0;
+	GLuint m_FullScreenShader = 0;
+
 };
 

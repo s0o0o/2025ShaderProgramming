@@ -48,6 +48,10 @@ void Renderer::CompileAllShaderPrograms()
 
 	// 1013
 	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vs", "./Shaders/GridMesh.fs");
+
+	// 1014
+	m_FullScreenShader = CompileShaders("./Shaders/FullScreen.vs", "./Shaders/FullScreen.fs");
+
 }
 
 void Renderer::DeleteAllShaderPrograms()
@@ -56,6 +60,7 @@ void Renderer::DeleteAllShaderPrograms()
 	glDeleteShader(m_TestShader);
 	glDeleteShader(m_ParticleShader);
 	glDeleteShader(m_GridMeshShader);
+	glDeleteShader(m_FullScreenShader);
 }
 
 
@@ -69,6 +74,7 @@ void Renderer::ReloadAllShaderPrograms()
 	DeleteAllShaderPrograms();
 	CompileAllShaderPrograms();
 }
+
 
 void Renderer::CreateVertexBufferObjects()
 {
@@ -141,6 +147,17 @@ void Renderer::CreateVertexBufferObjects()
 	// 이렇게만 하면 gpu에 VBO에 대한 메모리가 전혀 저장이 되지 않음.. 데이터를 올려줘야함
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTestCol);	// testID라는 애를 쓰겠다는.. 활성화하겠다는 의미(내가 이해한건..)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(testColor), testColor, GL_STATIC_DRAW);
+
+	float fullRect[]
+		=
+	{
+		-1.f , -1.f , 0.f, -1.f , 1.f , 0.f, 1.f , 1.f,  0.f, //Triangle1
+		-1.f , -1.f , 0.f,  1.f , 1.f , 0.f, 1.f , -1.f, 0.f, //Triangle2
+	};
+
+	glGenBuffers(1, &m_VBOFullScreen);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFullScreen);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRect), fullRect, GL_STATIC_DRAW);
 
 }
 
@@ -415,7 +432,7 @@ void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 
 void Renderer::GenerateParticles(int numParticles)
 {
-	int floatCountPerVertex = 3 + 1 + 4 + 1 + 3 + 1 + 1 + 1; 
+	int floatCountPerVertex = 3 + 1 + 4 + 1 + 3 + 1 + 1 + 1;
 	// x,y,z, value, r,g,b,a, sTime(생성되는시간), vx,vy,vz, lifeTime, mass, period
 	int verticesCountPerParticle = 6;
 	int floatCountPerParticle =
@@ -617,7 +634,7 @@ void Renderer::CreateGridMesh(int x, int y)
 			vertIndex++;
 			vertices[vertIndex] = 0.f;
 			vertIndex++;
-			
+
 			//Triangle part 2
 			vertices[vertIndex] = point[(y * pointCountX + x) * 2 + 0];
 			vertIndex++;
@@ -644,10 +661,11 @@ void Renderer::CreateGridMesh(int x, int y)
 	glGenBuffers(1, &m_GridMeshVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_GridMeshVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * (pointCountX - 1) * (pointCountY - 1) * 2 * 3 * 3, vertices, GL_STATIC_DRAW);
-	
+
 	delete[] point;
 	delete[] vertices;
 }
+
 
 
 void Renderer::DrawGridMesh()
@@ -664,9 +682,34 @@ void Renderer::DrawGridMesh()
 	glBindBuffer(GL_ARRAY_BUFFER, m_GridMeshVBO);
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
-	//glDrawArrays(GL_TRIANGLES, 0, m_GridMeshVertexCount);
-	glDrawArrays(GL_LINE_STRIP, 0, m_GridMeshVertexCount);
+	glDrawArrays(GL_TRIANGLES, 0, m_GridMeshVertexCount);
+	//glDrawArrays(GL_LINE_STRIP, 0, m_GridMeshVertexCount);
 
 	glDisableVertexAttribArray(attribPosition);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::DrawFullScreenColor(float r, float g, float b, float a)
+{
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	int shader = m_FullScreenShader;
+	float newX, newY;
+
+	//Program select
+	glUseProgram(shader);
+
+	glUniform4f(glGetUniformLocation(shader, "u_Color"), r, g, b, a);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	glEnableVertexAttribArray(attribPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFullScreen);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
