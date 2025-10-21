@@ -24,10 +24,24 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	CreateVertexBufferObjects();
 
 	// Create Grid Mesh 1013
-	CreateGridMesh(100, 100);
+	CreateGridMesh(1000, 1000);
 
 	// Create Particles
 	GenerateParticles(10000);
+
+	// 1021 Fill Points
+	int index = 0;
+	for (int i = 0; i < 400; i++)
+	{
+		float x = 2 * ((float)rand() / (float)RAND_MAX) - 1;
+		float y = 2 * ((float)rand() / (float)RAND_MAX) - 1;
+		float st = 10 * ((float)rand() / (float)RAND_MAX);
+		float lt = ((float)rand() / (float)RAND_MAX);
+		m_Points[index] = x; index++;
+		m_Points[index] = y; index++;
+		m_Points[index] = st; index++;
+		m_Points[index] = lt; index++;
+	}
 
 	if (m_SolidRectShader > 0 && m_VBORect > 0)
 	{
@@ -584,10 +598,10 @@ void Renderer::GenerateParticles(int numParticles)
 // 251013
 void Renderer::CreateGridMesh(int x, int y)
 {
-	float basePosX = -0.5f;
-	float basePosY = -0.5f;
-	float targetPosX = 0.5f;
-	float targetPosY = 0.5f;
+	float basePosX = -1.f;
+	float basePosY = -1.f;
+	float targetPosX = 1.f;
+	float targetPosY = 1.f;
 
 	int pointCountX = x;
 	int pointCountY = y;
@@ -670,12 +684,23 @@ void Renderer::CreateGridMesh(int x, int y)
 
 void Renderer::DrawGridMesh()
 {
+	m_time += 0.005;
+
+	//1021
+	float points[12] = { 0,0,2,2,
+						0.5,0,3,3,
+						-0.5,0,4,4 };
+
 	int shader = m_GridMeshShader;
 	glUseProgram(shader);
 
-	m_time += 0.005;
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
+
+	// 1021 points를 array로 넣어서.. 전달
+	int uPointsLoc = glGetUniformLocation(shader, "u_Points");
+	glUniform4fv(uPointsLoc, 100, m_Points);	// uPoints가 array라서 glUniform4fv
+
 
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);

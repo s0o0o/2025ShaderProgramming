@@ -1,4 +1,5 @@
 #version 330
+#define MAX_POINTS 100
 
 in
 vec3 a_Position;
@@ -8,6 +9,10 @@ vec4 v_Color;
 
 uniform float u_Time;
 const float c_PI = 3.141592;
+
+uniform vec4 u_Points[MAX_POINTS];
+
+//const vec4 c_Points[MAX_POINTS] = vec4[](vec4(0,0,2,3), vec4(0.5,0,3,4),vec4(-0.5,0,4,5));
 
 void Flag() // 1014
 {
@@ -39,9 +44,9 @@ void Wave()
     vec2 cen = vec2(0, 0);
     
     float d = distance(pos, cen);
-    float v = 2*clamp(0.5 - d,0,1);
+    float v = 2 * clamp(0.5 - d, 0, 1);
     
-    float newColor = v * sin(d * 4 * c_PI * 10 - u_Time*15);
+    float newColor = v * sin(d * 4 * c_PI * 10 - u_Time * 15);
     
     newPosition += vec4(dX, dY, 0, 0);
     gl_Position = newPosition;
@@ -49,40 +54,49 @@ void Wave()
     v_Color = vec4(newColor);
 }
 
-void Wave2()
+void RainDrop()
 {
     vec4 newPosition = vec4(a_Position, 1);
     
     float dX = 0;
     float dY = 0;
+    float newColor = 0;
     
     vec2 pos = vec2(a_Position.xy);
-    vec2 cen = vec2(0, 0);
-    float d = distance(pos, cen);
     
-    float newColor = 1;
-    
-    //if(d<0.5)
-    //{
-    //    newColor = 1;
-    //}
-    //else
-    //{
-    //    newColor = 0;
-    //}
-    
-    float value = 0.5 - d;
-    value = clamp(value, 0, 1);
-    value = ceil(value);
+    for (int i = 0; i < MAX_POINTS; i++)
+    {
+        float sTime = u_Points[i].z;
+        float lTime = u_Points[i].w;
+        float newTime = u_Time - sTime;
+        
+        if (newTime > 0)
+        {
+            float baseTime = fract(newTime / lTime);
+            
+            float oneMinus = 1 - baseTime;
+            
+            //float t = newTime;              // 이렇게 하면 순차적으로 파동 생성
+            float t = baseTime * lTime;
+            float range = baseTime * lTime / 15;
+            vec2 cen = u_Points[i].xy;
+            float d = distance(pos, cen);
+            float v = 30 * clamp(range - d, 0, 1); // 이때 앞에 range 는.. 퍼져나가는 범위, 맨 앞 숫자는.. 진하기?
+            newColor += oneMinus * v * sin(d * 4 * c_PI * 10 - t * 30);
+        }
+    }
     
     newPosition += vec4(dX, dY, 0, 0);
     gl_Position = newPosition;
     
     v_Color = vec4(newColor);
+   
 }
+
 
 void main()
 {
     //Flag();
-    Wave();
+    //Wave();
+    RainDrop();
 }
