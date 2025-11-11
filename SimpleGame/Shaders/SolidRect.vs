@@ -1,21 +1,22 @@
 #version 330
 
 in vec3 a_Position; 
-in vec4 a_Color;
+//in vec4 a_Color;
 
-out vec4 v_Color;
+//out vec4 v_Color;
 
 uniform vec4 u_Trans;
-
 
 void main()
 {
 	vec4 newPosition;
-	vec4 newColor;
-	newPosition.xy = a_Position.xy*u_Trans.w + u_Trans.xy;
+	//vec4 newColor;
+    newPosition.xy = a_Position.xy * u_Trans.w + u_Trans.xy; // u_Trans는 얼만큼 이동시킬지 정하는 변수
 	newPosition.z = 0;
 	newPosition.w= 1;
 	gl_Position = newPosition;
 
-	v_Color = a_Color;
+	//v_Color = a_Color;
 }
+
+

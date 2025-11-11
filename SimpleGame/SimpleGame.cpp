@@ -26,20 +26,20 @@ void RenderScene(void)
 		g_bNeedReloadShaderPrograms = false;
 	}
 
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	g_Renderer->DrawFullScreenColor(0,0,0,0);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	// 배경 설정
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//g_Renderer->DrawFullScreenColor(0,0.5f,0,1.f);
+	glClearColor(0.0f, 0.f, 0.0f, 1.0f);	// 배경 설정
 
 	// Renderer Test
-	//g_Renderer->DrawSolidRect(0, 0, 0, 4, 1, 0, 1, 1);
-	//g_Renderer->DrawTest();
+	//g_Renderer->DrawSolidRect(0.2, 0.1, 0, 3, 1, 0, 1, 1);	// 이거 안됨
+	//g_Renderer->DrawTest();	// 두개 사각형 빙글빙글 돔
 	//g_Renderer->DrawParticle();
 	
 	g_Renderer->DrawGridMesh();
 
 	glutSwapBuffers();
 }
-
+	
 void Idle(void)
 {
 	RenderScene();
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(1000, 1000);
+	glutInitWindowSize(800, 800);
 	glutCreateWindow("Game Software Engineering KPU");
 
 	glewInit();

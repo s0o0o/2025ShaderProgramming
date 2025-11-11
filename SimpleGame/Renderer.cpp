@@ -23,24 +23,26 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Create VBOs
 	CreateVertexBufferObjects();
 
-	// Create Grid Mesh 1013
-	CreateGridMesh(1000, 1000);
-
 	// Create Particles
-	GenerateParticles(10000);
+	//GenerateParticles(10000);
+
+	// Create Grid Mesh 1013
+	CreateGridMesh(500, 500);
 
 	// 1021 Fill Points
 	int index = 0;
-	for (int i = 0; i < 400; i++)
+	for (int i = 0; i < 100; i++)
 	{
-		float x = 2 * ((float)rand() / (float)RAND_MAX) - 1;
+		float x = 2 * ((float)rand() / (float)RAND_MAX) - 1; // 빗방울 떨어질 x좌표
 		float y = 2 * ((float)rand() / (float)RAND_MAX) - 1;
-		float st = 10 * ((float)rand() / (float)RAND_MAX);
-		float lt = ((float)rand() / (float)RAND_MAX);
+		float st = 10 * ((float)rand() / (float)RAND_MAX);	// 시작 시간
+		float lt = ((float)rand() / (float)RAND_MAX);		// 수명
 		m_Points[index] = x; index++;
 		m_Points[index] = y; index++;
 		m_Points[index] = st; index++;
 		m_Points[index] = lt; index++;
+		// m_Points는 x,y, start time, life time 순서로 저장됨
+		// 총 100개의 빗방울 정보가 저장됨
 	}
 
 	if (m_SolidRectShader > 0 && m_VBORect > 0)
@@ -312,9 +314,11 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(attribPosition);
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
+
+
 
 void Renderer::DrawTest()
 {
@@ -367,7 +371,7 @@ void Renderer::DrawParticle()
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
 	int uForceLoc = glGetUniformLocation(shader, "u_Force");
-	glUniform3f(uForceLoc, std::sin(m_time), 0, 0);
+	glUniform3f(uForceLoc, std::sin(m_time), 0, 0);	// -1~1 진동, x축으로만 알짜힘 넣게만드는중.. y축은 0
 
 	int aPosLoc = glGetAttribLocation(shader, "a_Position"); // a_Position라는 함수를 받아와서
 	int aValueLoc = glGetAttribLocation(shader, "a_Value"); // 0922
@@ -446,20 +450,20 @@ void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 
 void Renderer::GenerateParticles(int numParticles)
 {
-	int floatCountPerVertex = 3 + 1 + 4 + 1 + 3 + 1 + 1 + 1;
+	int floatCountPerVertex = 3 + 1 + 4 + 1 + 3 + 1 + 1 + 1;	// 한 버텍스마다 가지는 정보
 	// x,y,z, value, r,g,b,a, sTime(생성되는시간), vx,vy,vz, lifeTime, mass, period
 	int verticesCountPerParticle = 6;
 	int floatCountPerParticle =
-		floatCountPerVertex * verticesCountPerParticle;
-	int totalVerticesCount = numParticles * verticesCountPerParticle;
-	int totlaFloatCount = floatCountPerVertex * totalVerticesCount;
+		floatCountPerVertex * verticesCountPerParticle;	// 한 사각형 마다 가진 총 float 갯수
+	int totalVerticesCount = numParticles * verticesCountPerParticle;	// 만들 파티클 갯수 * 한 사각형의 정점 갯수(6개) = 총 사각형 갯수
+	int totlaFloatCount = floatCountPerVertex * totalVerticesCount;		// 총 사각형 갯수 * 그 사각형 하나마다 가진 정보 = 총 float 갯수
 
 	float* vertices = new float[totlaFloatCount];
 
 	for (int i = 0; i < numParticles; ++i) {
 		float x, y, z, value, r, g, b, a;
-		x = 0; //((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
-		y = 0; //((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
+		x = 0;// ((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
+		y = 0;// ((float)rand() / (float)RAND_MAX) * 2.f - 1.f;
 		z = 0.f;
 
 		value = ((float)rand() / (float)RAND_MAX);
@@ -565,7 +569,7 @@ void Renderer::GenerateParticles(int numParticles)
 		vertices[index] = mass; index++;
 		vertices[index] = period; index++;
 
-		vertices[index] = x + size; index++;	// v3
+		vertices[index] = x + size; index++;	// v6
 		vertices[index] = y + size; index++;
 		vertices[index] = z; index++;
 		vertices[index] = value; index++;
@@ -585,7 +589,8 @@ void Renderer::GenerateParticles(int numParticles)
 
 	glGenBuffers(1, &m_VBOParticle);	// (갯수, 레퍼런스에 넘겨줌)	
 	// 이렇게만 하면 gpu에 VBO에 대한 메모리가 전혀 저장이 되지 않음.. 데이터를 올려줘야함
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);	// testID라는 애를 쓰겠다는.. 활성화하겠다는 의미(내가 이해한건..)
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticle);	
+	// testID라는 애를 쓰겠다는.. 활성화하겠다는 의미(내가 이해한건..)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * totlaFloatCount,
 		vertices, GL_STATIC_DRAW);
 
@@ -720,7 +725,6 @@ void Renderer::DrawFullScreenColor(float r, float g, float b, float a)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	int shader = m_FullScreenShader;
-	float newX, newY;
 
 	//Program select
 	glUseProgram(shader);
@@ -731,6 +735,13 @@ void Renderer::DrawFullScreenColor(float r, float g, float b, float a)
 	glEnableVertexAttribArray(attribPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFullScreen);
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	// 인자 순서는..
+	// 누구한테 이 읽는 방법을 적용할건지 attribPosition
+	// 몇개씩 이루어져있는지 3
+	// 타입 GL_FLOAT
+	// 정규화 할건지 GL_FALSE
+	// 스트라이드 (몇바이트씩 건너뛸건지) sizeof(float) * 3
+	// 버퍼내에서 어디서부터 읽을건지 오프셋 0
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 

@@ -14,7 +14,7 @@ public:
 	~Renderer();
 
 	bool IsInitialized();
-	void ReloadAllShaderPrograms(); // 0923
+	void ReloadAllShaderPrograms(); // 0923 
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawFullScreenColor(float r, float g, float b, float a);	//1013
 
