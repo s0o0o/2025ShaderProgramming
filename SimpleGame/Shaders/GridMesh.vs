@@ -23,40 +23,40 @@ void exam1()    // 세로줄 출력
 
 }
 
-void exam2() // 다이아몬트 형태로 출력하는거....
-{
-    vec4 newPosition = vec4(a_Position, 1);
-    float valueX = newPosition.x + 0.5;
-    float valueY = newPosition.y + 0.5;
-    float greyScale = sin(2 * c_PI * valueX * 4);
-    greyScale += sin(2 * c_PI * valueY * 4);
-    v_Color = vec4(greyScale);
-    v_Color.a = 1.0;
-    gl_Position = newPosition;
-}
+//void exam2() // 다이아몬트 형태로 출력하는거....
+//{
+//    vec4 newPosition = vec4(a_Position, 1);
+//    float valueX = newPosition.x + 0.5;
+//    float valueY = newPosition.y + 0.5;
+//    float greyScale = sin(2 * c_PI * valueX * 4);
+//    greyScale += sin(2 * c_PI * valueY * 4);
+//    v_Color = vec4(greyScale);
+//    v_Color.a = 1.0;
+//    gl_Position = newPosition;
+//}
 
-void exam3()    // 싸인함수 출력
-{
-    vec4 newPosition = vec4(a_Position, 1);
-    newPosition.x += 2 * (a_Value - 0.5);
-    newPosition.y += sin(2 * (a_Value - 0.5)*c_PI);
+//void exam3()    // 싸인함수 출력
+//{
+//    vec4 newPosition = vec4(a_Position, 1);
+//    newPosition.x += 2 * (a_Value - 0.5);
+//    newPosition.y += sin(2 * (a_Value - 0.5)*c_PI);
 
-}  
+//}  
 
-void exam4()    // 원형 출력
-{
+//void exam4()    // 원형 출력
+//{
     
-}
+//}
 
-void exam5()    // 원형 출력 + x축으로 커짐
-{
+//void exam5()    // 원형 출력 + x축으로 커짐
+//{
     
-}
+//}
 
-void exam6()    // 소용돌이 + 빙글빙글돔
-{
+//void exam6()    // 소용돌이 + 빙글빙글돔
+//{
     
-}
+//}
 
 void Flag() // 1014
 {
@@ -158,6 +158,5 @@ void main()
     //Flag();
     //Wave();
     //RainDrop();
-    exam2();
-
+    exam1();
 }

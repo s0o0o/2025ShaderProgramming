@@ -27,7 +27,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//GenerateParticles(10000);
 
 	// Create Grid Mesh 1013
-	CreateGridMesh(500, 500);
+	//CreateGridMesh(500, 500);
 
 	// 1021 Fill Points
 	int index = 0;
@@ -68,6 +68,9 @@ void Renderer::CompileAllShaderPrograms()
 	// 1014
 	m_FullScreenShader = CompileShaders("./Shaders/FullScreen.vs", "./Shaders/FullScreen.fs");
 
+	// 1111
+	m_FSShader = CompileShaders("./Shaders/FS.vs", "./Shaders/FS.fs");
+
 }
 
 void Renderer::DeleteAllShaderPrograms()
@@ -77,6 +80,7 @@ void Renderer::DeleteAllShaderPrograms()
 	glDeleteShader(m_ParticleShader);
 	glDeleteShader(m_GridMeshShader);
 	glDeleteShader(m_FullScreenShader);
+	glDeleteShader(m_FSShader);
 }
 
 
@@ -174,6 +178,24 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBOFullScreen);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFullScreen);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRect), fullRect, GL_STATIC_DRAW);
+
+
+	// 1111
+
+	float fullRectFS[]
+		=
+	{
+		-1.f , -1.f , 0.f,
+		-1.f , 1.f , 0.f, 
+		1.f , 1.f,  0.f, //Triangle1
+		-1.f , -1.f , 0.f,  
+		1.f , 1.f , 0.f, 
+		1.f , -1.f, 0.f, //Triangle2
+	};
+
+	glGenBuffers(1, &m_VBOFS);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullRectFS), fullRectFS, GL_STATIC_DRAW);
 
 }
 
@@ -734,6 +756,35 @@ void Renderer::DrawFullScreenColor(float r, float g, float b, float a)
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFullScreen);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	// 인자 순서는..
+	// 누구한테 이 읽는 방법을 적용할건지 attribPosition
+	// 몇개씩 이루어져있는지 3
+	// 타입 GL_FLOAT
+	// 정규화 할건지 GL_FALSE
+	// 스트라이드 (몇바이트씩 건너뛸건지) sizeof(float) * 3
+	// 버퍼내에서 어디서부터 읽을건지 오프셋 0
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::DrawFS()
+{
+	m_time += 0.001;
+	int shader = m_FSShader;
+
+	//Program select
+	glUseProgram(shader);
+
+	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
+	glUniform1f(uTimeLoc, m_time);
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	glEnableVertexAttribArray(attribPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 	// 인자 순서는..
 	// 누구한테 이 읽는 방법을 적용할건지 attribPosition

@@ -17,6 +17,7 @@ public:
 	void ReloadAllShaderPrograms(); // 0923 
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawFullScreenColor(float r, float g, float b, float a);	//1013
+	void DrawFS();
 
 	// LECTURE 2
 	void DrawTest();
@@ -74,5 +75,9 @@ private:
 	
 	// 1021 For raindrop effect
 	float m_Points[100 * 4];
+
+	// for fragment shader factory 1111
+	GLuint m_VBOFS = 0;
+	GLuint m_FSShader = 0;
 };
 
