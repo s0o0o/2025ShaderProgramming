@@ -4,6 +4,7 @@
 in vec3 a_Position;
 
 out vec4 v_Color;
+out vec2 v_UV;
 
 uniform float u_Time;
 const float c_PI = 3.141592;
@@ -62,15 +63,15 @@ void Flag() // 1014
 {
     vec4 newPosition = vec4(a_Position, 1);
 
-    float value = (a_Position.x + 1.0) / 2.0;   // 0~1사이..
+    float value = a_Position.x + 0.5;  
 
-    newPosition.y = newPosition.y * (1 - value);
+  //  newPosition.y = newPosition.y * (1 - value);
     // value는 0~1 사이
     // 깃발의 왼쪽 끝은 value = 0 -> 즉 y값 그대로 -> 높이변화 x
     // 깃발의 오른쪽 끝은 value = 1 -> 즉 y값 점점 작아짐 -> 높이가 줄어든다
 	
-    float dX = 0.f;
-    float dY = 0.5 * value * sin(2 * value * c_PI - u_Time * 4);
+    float dX = 0.5f;
+    float dY = 0.2 * value * sin(2 * value * c_PI - u_Time * 4);
     // 이를 통해 깃발 펄럭임이 구현됨
     // 2*value*c_PI는 한 주기의 파동이고..
     // u_Time으로 시간이 변하면서 sin파동이 오른쪽으로 갈수록.. sin 파동이 오른쪽으로 흐르는것처럼 보임
@@ -81,6 +82,7 @@ void Flag() // 1014
     gl_Position = newPosition;
 
     v_Color = vec4(newColor);
+    v_UV = vec2(a_Position.x + 0.5, 0.5 - a_Position.y);
 }
 
 void Wave()
@@ -155,8 +157,8 @@ void RainDrop()
 
 void main()
 {
-    //Flag();
+    Flag();
     //Wave();
     //RainDrop();
-    exam1();
+    //exam1();
 }

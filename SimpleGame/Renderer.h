@@ -4,8 +4,10 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <cassert>
 
 #include "Dependencies\glew.h"
+#include "LoadPng.h"
 
 class Renderer
 {
@@ -37,6 +39,7 @@ private:
 	void CompileAllShaderPrograms();
 	void DeleteAllShaderPrograms();
 	void CreateGridMesh(int x, int y);	//1013
+	GLuint CreatePngTexture(char* filePath, GLuint samplingMethod); // 1117
 
 	bool m_Initialized = false;
 	
@@ -79,5 +82,9 @@ private:
 	// for fragment shader factory 1111
 	GLuint m_VBOFS = 0;
 	GLuint m_FSShader = 0;
+
+	// 1117
+	GLuint m_RGBTexture = 0;
+	GLuint m_Texture0 = 0;
 };
 

@@ -27,7 +27,11 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//GenerateParticles(10000);
 
 	// Create Grid Mesh 1013
-	//CreateGridMesh(500, 500);
+	CreateGridMesh(500, 500);
+
+	// 1117
+	m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
+	m_Texture0 = CreatePngTexture("./texture0.png", GL_NEAREST);
 
 	// 1021 Fill Points
 	int index = 0;
@@ -338,8 +342,6 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 	glDisableVertexAttribArray(attribPosition);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
-
 
 
 void Renderer::DrawTest()
@@ -707,6 +709,29 @@ void Renderer::CreateGridMesh(int x, int y)
 	delete[] vertices;
 }
 
+GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod)
+{
+	//Load Png
+	std::vector<unsigned char> image;
+	unsigned width, height;
+	unsigned error = lodepng::decode(image, width, height, filePath);
+	if (error != 0)
+	{
+		std::cout << "PNG image loading failed:" << filePath << std::endl;
+		assert(0);	// 디버그 할때 바로 죽여버림
+	}
+
+	GLuint temp;
+	glGenTextures(1, &temp);
+	glBindTexture(GL_TEXTURE_2D, temp);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+		GL_UNSIGNED_BYTE, &image[0]);
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, samplingMethod);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, samplingMethod);
+
+	return temp;
+}
 
 
 void Renderer::DrawGridMesh()
@@ -723,6 +748,10 @@ void Renderer::DrawGridMesh()
 
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
+
+	int uTextureLoc = glGetAttribLocation(shader, "u_Texture");
+	glUniform1f(uTextureLoc, 0);
+	glBindTexture(GL_TEXTURE_2D, m_Texture0);
 
 	// 1021 points를 array로 넣어서.. 전달
 	int uPointsLoc = glGetUniformLocation(shader, "u_Points");
@@ -782,8 +811,14 @@ void Renderer::DrawFS()
 
 	int uTimeLoc = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTimeLoc, m_time);
+	int uTextureLoc = glGetAttribLocation(shader, "u_RGBTexture");
+	glUniform1f(uTextureLoc, 0);
+
+	glBindTexture(GL_TEXTURE_2D, m_RGBTexture);
+
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
+
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 	// 인자 순서는..
@@ -800,3 +835,4 @@ void Renderer::DrawFS()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
