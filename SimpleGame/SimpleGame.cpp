@@ -26,6 +26,7 @@ void RenderScene(void)
 		g_bNeedReloadShaderPrograms = false;
 	}
 
+	// 야르야르야야르
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//g_Renderer->DrawFullScreenColor(0,0.5f,0,1.f);
 	glClearColor(0.0f, 0.f, 0.0f, 1.0f);	// 배경 설정
