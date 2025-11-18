@@ -27,7 +27,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//GenerateParticles(10000);
 
 	// Create Grid Mesh 1013
-	CreateGridMesh(500, 500);
+	CreateGridMesh(1000, 1000);
 
 	// 1117
 	m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
@@ -627,10 +627,10 @@ void Renderer::GenerateParticles(int numParticles)
 // 251013
 void Renderer::CreateGridMesh(int x, int y)
 {
-	float basePosX = -1.f;
-	float basePosY = -1.f;
-	float targetPosX = 1.f;
-	float targetPosY = 1.f;
+	float basePosX = -1.f/2;
+	float basePosY = -1.f/2;
+	float targetPosX = 1.f/2;
+	float targetPosY = 1.f/2;
 
 	int pointCountX = x;
 	int pointCountY = y;
