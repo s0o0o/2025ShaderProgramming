@@ -20,6 +20,9 @@ public:
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawFullScreenColor(float r, float g, float b, float a);	//1013
 	void DrawFS();
+	void DrawTexture(float x, float y, float sx, float sy, GLuint TexID);
+	void DrawDebugTexture();
+	void DrawFBOs(); // 0125
 
 	// LECTURE 2
 	void DrawTest();
@@ -30,19 +33,20 @@ public:
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
-	bool ReadFile(char* filename, std::string *target);
+	bool ReadFile(char* filename, std::string* target);
 	void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
 	GLuint CompileShaders(char* filenameVS, char* filenameFS);
 	void CreateVertexBufferObjects();
-	void GetGLPosition(float x, float y, float *newX, float *newY);
+	void GetGLPosition(float x, float y, float* newX, float* newY);
 	void GenerateParticles(int numParticles);
 	void CompileAllShaderPrograms();
 	void DeleteAllShaderPrograms();
 	void CreateGridMesh(int x, int y);	//1013
 	GLuint CreatePngTexture(char* filePath, GLuint samplingMethod); // 1117
+	void CreateFBOs(); // /125
 
 	bool m_Initialized = false;
-	
+
 	unsigned int m_WindowSizeX = 0;
 	unsigned int m_WindowSizeY = 0;
 
@@ -54,7 +58,7 @@ private:
 
 	GLuint m_VBOTestPos = 0; // 아이디를 만들어서 
 	GLuint m_VBOTestCol = 0; // 아이디를 만들어서 
-	
+
 
 	// LECTURE 4 (0916)
 	GLuint m_TestShader = 0; // 아이디를 만들어서 
@@ -75,7 +79,7 @@ private:
 	// Full Screen
 	GLuint m_VBOFullScreen = 0;
 	GLuint m_FullScreenShader = 0;
-	
+
 	// 1021 For raindrop effect
 	float m_Points[100 * 4];
 
@@ -99,5 +103,25 @@ private:
 	GLuint m_8Texture = 0;
 	GLuint m_9Texture = 0;
 	GLuint m_NumTexture = 0;
+
+	// 1125 Texture
+	GLuint m_TexVBO = 0;
+	GLuint m_TexShader = 0;
+
+	// FBO Color buffers
+	GLuint m_RT0 = 0;
+	GLuint m_RT1 = 0;
+	GLuint m_RT2 = 0;
+	GLuint m_RT3 = 0;
+	GLuint m_RT4 = 0;
+	
+	GLuint m_FBO0 = 0;
+	GLuint m_FBO1 = 0;
+	GLuint m_FBO2 = 0;
+	GLuint m_FBO3 = 0;
+	GLuint m_FBO4 = 0;
+	GLuint m_FBO5 = 0;
+
+
 };
 

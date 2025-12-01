@@ -158,6 +158,6 @@ void circleParticle()
 void main()
 {
 	//raining();
-	sinParticle2();
-	//circleParticle();
+	//sinParticle2();
+	circleParticle();
 }
