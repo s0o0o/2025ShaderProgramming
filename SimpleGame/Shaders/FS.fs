@@ -1,6 +1,7 @@
 #version 330
 
 layout(location=0) out vec4 FragColor;
+layout(location=1) out vec4 FragColor1;
 in vec2 v_UV;
 
 uniform sampler2D u_RGBTexture;
@@ -11,17 +12,17 @@ uniform float u_Time;
 
 const float c_PI = 3.141592;
 
-void Test()
+vec4 Test()
 {
     vec2 newUV = v_UV;
     float dx = 0.1 * sin(v_UV.y * 2 * c_PI * 3 + u_Time);
     float dy = 0.1 * sin(v_UV.x * 2 * c_PI * 3 + u_Time);
     newUV += vec2(dx, dy);
     vec4 sampledColor = texture(u_RGBTexture, newUV);
-    FragColor =sampledColor;
+    return sampledColor;
 }
 
-void Circle()
+vec4 Circle()
 { 
     vec2 newUV = v_UV;  // 0~1, 0,0 left top
     vec2 center = vec2(0.5, 0.5);
@@ -29,10 +30,10 @@ void Circle()
     float d = distance (newUV, center);
     float value = sin(d*c_PI*10 - u_Time*5);
     newColor = vec4(value);
-    FragColor = newColor;
+    return newColor;
 }
 
-void Flag()
+vec4 Flag()
 { 
     vec2 newUV = vec2(v_UV.x , 1-v_UV.y - 0.5);  // 0~1, 0,0 left bottom
     vec4 newColor = vec4(0);
@@ -45,41 +46,41 @@ void Flag()
         newColor = vec4(1);
     }
     else {
-     discard;
+     //discard;
     }
-    FragColor = newColor;
+    return newColor;
 }
 
-void Q1()
+vec4 Q1()
 {
     vec2 newUV = vec2(v_UV.x,v_UV.y);  // 0~1, 0,0 left bottom
     float x = newUV.x;
     float y = 1 - abs(2*(v_UV.y - 0.5));     // 0~1~0
     vec4 newColor = texture(u_RGBTexture, vec2(x, y));
 
-    FragColor = newColor;
+    return newColor;
 }
 
-void Q2()
+vec4 Q2()
 {
     vec2 newUV = vec2(v_UV.x,v_UV.y);  // 0~1, 0,0 left bottom
     float x = fract(newUV.x*3);
     float y = (2-floor(newUV.x*3))/3 + newUV.y/3;     // 0~1~0
     vec4 newColor = texture(u_RGBTexture,  vec2(x, y));
-    FragColor = newColor;
+    return newColor;
 }
 
-void Q3()
+vec4 Q3()
 {
     vec2 newUV = vec2(v_UV.x,v_UV.y);  // 0~1, 0,0 left bottom
     float x = fract(newUV.x*3);
     float y = (3+floor(newUV.x*3))/3 + newUV.y/3;     // 0~1~0
     vec4 newColor = texture(u_RGBTexture,  vec2(x, y));
-    FragColor = newColor;
+    return newColor;
 }
 
 
-void Brick_Horizontal()
+vec4 Brick_Horizontal()
 {
     vec2 newUV = vec2(v_UV.x,v_UV.y);  // 0~1, 0,0 left bottom
     float rCount = 2;   // 몇번씩 반복될건징..
@@ -87,21 +88,21 @@ void Brick_Horizontal()
     float x = fract(newUV.x*rCount) +  floor(newUV.y*rCount)*sAmount; // 0~1 0~1
     float y = fract(newUV.y*2); // 0~1 0~1
     vec4 newColor = texture(u_RGBTexture,  vec2(x, y));
-    FragColor = newColor;
+    return newColor;
 }
 
 
-void Brick_Vertical()
+vec4 Brick_Vertical()
 {
     vec2 newUV = vec2(v_UV.x,v_UV.y);  // 0~1, 0,0 left bottom
     float x = fract(newUV.x*2); // 0~1 0~1
     float y = fract(newUV.y*2) + floor(newUV.x*2)*0.5; // 0~1 0~1
     vec4 newColor = texture(u_RGBTexture,  vec2(x, y));
-    FragColor = newColor;
+    return newColor;
 }
 
 
-void Brick_Horizontal_AI()
+vec4 Brick_Horizontal_AI()
 {
     vec2 newUV = vec2(v_UV.x, v_UV.y);  // 0~1, 0,0 left bottom
 
@@ -135,15 +136,15 @@ void Brick_Horizontal_AI()
     float x = finalUV.x;
     float y = finalUV.y;
     vec4 newColor = texture(u_RGBTexture,  vec2(x, y));
-    FragColor = newColor;
+    return newColor;
 }
 
-void Digit()
+vec4 Digit()
 {
-    FragColor = texture(u_DigitTexture, v_UV);
+    return texture(u_DigitTexture, v_UV);
 }
 
-void Digit_Num()
+vec4 Digit_Num()
 {
     int digit = int(u_Time)%10; // 이러면 숫자가 바뀐당
     int tileIndex = (digit + 9)%10;
@@ -153,10 +154,10 @@ void Digit_Num()
 
     float tx = v_UV.x*0.2 + offX;
     float ty = v_UV.y*0.5 + offY;
-    FragColor = texture(u_NumTexture,  vec2(tx, ty));
+    return texture(u_NumTexture,  vec2(tx, ty));
 }
 
-void Digit_Num_AI()
+vec4 Digit_Num_AI()
 {
     // [설정] 표시하고 싶은 전체 숫자 (예: 시간)
     int totalNumber = int(u_Time); 
@@ -200,7 +201,7 @@ void Digit_Num_AI()
     float tx = localUV.x * 0.2 + offX;
     float ty = localUV.y * 0.5 + offY;
 
-    FragColor = texture(u_NumTexture, vec2(tx, ty));
+    return texture(u_NumTexture, vec2(tx, ty));
 }
 
 void main()
@@ -216,5 +217,7 @@ void main()
     //Brick_Horizontal_AI();
     //Digit();
     //Digit_Num();
-    Digit_Num_AI(); // 5ㅈㅏ리 만들수있음
+    //Digit_Num_AI(); // 5ㅈㅏ리 만들수있음
+    FragColor = Circle();
+    FragColor1 = Flag();
 }
